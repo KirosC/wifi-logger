@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tool="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="8dp"
+    android:paddingEnd="16dp"
+    android:paddingStart="16dp"
+    android:paddingTop="8dp">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/ssid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:textColor="@color/md_grey_900"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tool:hint="SSID: Mum Use This One" />
+
+        <TextView
+            android:id="@+id/bssid"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/md_grey_600"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/ssid"
+            tool:hint="BSSID: 4A-C0-D0-07-91-E5" />
+
+        <TextView
+            android:id="@+id/level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="8dp"
+            android:textColor="@color/md_grey_600"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tool:hint="-68 dBm" />
+
+        <TextView
+            android:id="@+id/protocol"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/md_grey_600"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/level"
+            tool:hint="WPA2" />
+
+    </android.support.constraint.ConstraintLayout>
+
+    <!--<TextView-->
+    <!--android:id="@+id/ssid"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:paddingBottom="8dp"-->
+    <!--android:textColor="@color/md_grey_900"-->
+    <!--tool:hint="SSID: Mum Use This One" />-->
+
+    <!--<TextView-->
+    <!--android:id="@+id/bssid"-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="wrap_content"-->
+    <!--android:textColor="@color/md_grey_600"-->
+    <!--tool:hint="BSSID: 4A-C0-D0-07-91-E5" />-->
+</LinearLayout>
