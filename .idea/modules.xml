@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/WiFiLogger.iml" filepath="$PROJECT_DIR$/WiFiLogger.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/wifi-logger.iml" filepath="$PROJECT_DIR$/wifi-logger.iml" />
     </modules>
   </component>
 </project>
