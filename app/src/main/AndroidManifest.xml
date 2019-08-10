@@ -1,41 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.kirosc.wifilogger">
-
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <!-- Needed only if your app targets Android 5.0 (API level 21) or higher. -->
-    <!-- <uses-feature android:name="android.hardware.location.gps" /> -->
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+          package="com.kirosc.wifilogger">
 
     <application
-        android:allowBackup="true"
-        android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+            android:allowBackup="true"
+            android:icon="@mipmap/ic_launcher"
+            android:label="@string/app_name"
+            android:roundIcon="@mipmap/ic_launcher_round"
+            android:supportsRtl="true"
+            android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <action android:name="android.net.wifi.STATE_CHANGE" />
-                <action android:name="android.net.wifi.SCAN_RESULTS" />
-            </intent-filter>
-        </activity>
-        <activity
-            android:name=".SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".MainActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value=".MainActivity" />
-            <intent-filter>
-                <action android:name="android.intent.action.MANAGE_NETWORK_USAGE" />
-                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
     </application>
