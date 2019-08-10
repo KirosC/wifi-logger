@@ -1,3 +1,32 @@
 <resources>
     <string name="app_name">WiFi Logger</string>
+    <string name="no_gps">GPS is disabled</string>
+    <string name="enable_gps">Please enable GPS to use this app.</string>
+    <string name="no_wifi_nearby">No Wi-Fi Nearby</string>
+    <string name="scanning">Scanning...</string>
+    <string name="key_scan_interval">scan_interval</string>
+    <string name="title_scan_interval">Scan Interval</string>
+    <string name="summary_scan_interval">The time between two consecutive scans</string>
+    <string name="dialog_title_scan_interval">Scanning frequency (second)</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="settings">Settings</string>
+    <string name="loading">Loading...</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
+    <string name="save">Save</string>
+    <string name="open">Open</string>
+    <string name="email">Email</string>
+    <string name="scan_finished">Scan finished</string>
+    <string name="require_storage_permission">Require storage permission to save and read file.</string>
+    <string name="no_scan_result">No scan result.</string>
+    <string name="file_loaded">Opened file</string>
+    <string name="file_not_loaded">Error. Unknown file format.</string>
+    <string name="no_external_storage">External storage not available.</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="no_storage_permission">Require storage permission</string>
+    <string name="fail_save">Saved failed</string>
+    <string name="stop_scanning">Stop scanning</string>
+    <string name="resume_scanning">Resume scanning</string>
+    <string name="require_location_permission">Location permission is required to run this app</string>
 </resources>
