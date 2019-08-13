@@ -2,13 +2,17 @@ package com.kirosc.wifilogger
 
 import android.Manifest
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Bundle
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
-import android.support.v7.app.AppCompatActivity
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.databinding.DataBindingUtil
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
 import com.kirosc.wifilogger.Helper.WiFiHelper
-
+import com.kirosc.wifilogger.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
     /**
@@ -18,12 +22,32 @@ class MainActivity : AppCompatActivity() {
     private val STORAGE_PERMISSIONS_REQUEST_CODE = 1001
 
     private lateinit var wifiHelper: WiFiHelper
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        val binding: ActivityMainBinding =
+            DataBindingUtil.setContentView(this, R.layout.activity_main)
 
+        binding.loading = true
+
+        // Setup helper and client
         wifiHelper = WiFiHelper(this)
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // What to do after getting the last location
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    binding.loading = false
+                    binding.latitude = location.latitude.toString()
+                    binding.longitude = location.longitude.toString()
+                } else {
+                    Toast.makeText(this, getString(R.string.location_error), Toast.LENGTH_SHORT).show()
+                }
+            }
+
+
 
         if (checkLocationPermission()) {
             wifiHelper.scan()
@@ -38,7 +62,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-
+        wifiHelper.unregister()
     }
 
     override fun onRequestPermissionsResult(
