@@ -1,4 +1,4 @@
-package com.kirosc.wifilogger.Helper
+package com.kirosc.wifilogger.helper
 
 import android.content.BroadcastReceiver
 import android.content.Context
@@ -7,7 +7,7 @@ import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import android.util.Log
 
-class WiFiHelper(_context: Context) {
+open class WiFiHelper(_context: Context) {
     private val TAG = "WiFiLogger_Debug"
 
     private val context = _context
@@ -36,7 +36,7 @@ class WiFiHelper(_context: Context) {
         wifiManager.startScan();
     }
 
-    private fun scanSuccess() {
+    open fun scanSuccess() {
         val results = wifiManager.scanResults
 
         Log.v(TAG, "Wi-Fi Scan Results ... Count:" + results.size)
@@ -63,6 +63,8 @@ class WiFiHelper(_context: Context) {
             nearbyWifi.add(WiFi(result.BSSID.toUpperCase(), result.SSID, result.level, encryption))
         }
 
+        // Execute callback
+        updateUI(nearbyWifi)
     }
 
     private fun scanFailure() {
@@ -78,6 +80,10 @@ class WiFiHelper(_context: Context) {
 
     fun unregister() {
         context.unregisterReceiver(wifiScanReceiver)
+    }
+
+    fun updateUI(wifiList: ArrayList<WiFi>) {
+
     }
 
 }

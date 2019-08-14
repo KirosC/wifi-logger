@@ -1,30 +1,39 @@
 package com.kirosc.wifilogger
 
-import android.content.Context
-import androidx.recyclerview.widget.RecyclerView
-import android.view.View
+import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.kirosc.wifilogger.Helper.WiFi
+import androidx.databinding.DataBindingUtil
+import com.kirosc.wifilogger.databinding.ListItemBinding
+import com.kirosc.wifilogger.helper.WiFi
 
-class WiFiAdapter(_context: Context, _wifiList: ArrayList<WiFi>) :
+
+class WiFiAdapter(_wifiList: ArrayList<WiFi>) :
     androidx.recyclerview.widget.RecyclerView.Adapter<WiFiAdapter.ViewHolder>() {
-    private val context = _context
     private val wifiList = _wifiList
 
-    class ViewHolder(view: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(view) {
+    class ViewHolder(_binding: ListItemBinding) : androidx.recyclerview.widget.RecyclerView.ViewHolder(_binding.root) {
+        var binding: ListItemBinding = _binding
+
         init {
+            binding.executePendingBindings()
         }
     }
 
-    override fun onCreateViewHolder(p0: ViewGroup, p1: Int): ViewHolder {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val binding: ListItemBinding = DataBindingUtil.inflate(
+            LayoutInflater.from(parent.context),
+            R.layout.list_item, parent, false
+        )
+
+        return ViewHolder(binding)
     }
 
-    override fun getItemCount(): Int {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getItemCount() = wifiList.size
 
-    override fun onBindViewHolder(p0: ViewHolder, p1: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun onBindViewHolder(holder: ViewHolder, pos: Int) {
+        holder.binding.ssid.text = wifiList[pos].SSID
+        holder.binding.bssid.text = wifiList[pos].BSSID
+        holder.binding.level.text = wifiList[pos].level.toString()
+        holder.binding.encryption.text = wifiList[pos].encryption
     }
 }
