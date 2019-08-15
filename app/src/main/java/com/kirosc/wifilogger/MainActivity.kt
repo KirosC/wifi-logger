@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
-import android.os.Handler
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -35,8 +34,15 @@ class MainActivity : AppCompatActivity() {
         val binding: ActivityMainBinding =
             DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-
         binding.loading = true
+
+        // Initialize RecyclerView
+        recycler_view.apply {
+
+            layoutManager = LinearLayoutManager(context)
+
+            adapter = WiFiAdapter(wifiList)
+        }
 
         // Setup helper and client
         wifiHelper = WiFiHelper(this)
@@ -55,28 +61,18 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-//        val adapter = object : WiFiHelper(this) {
-//            override fun scanSuccess() {
-//                super.scanSuccess()
-//
-//            }
-//        }
-        wifiList.add(WiFi("38:BC:01:64:2D:38", "Example", -87, "WPA2"))
-
-        recycler_view.apply {
-
-            layoutManager = LinearLayoutManager(context)
-
-            adapter = WiFiAdapter(wifiList)
+        val wifiHelper = object : WiFiHelper(this) {
+            override fun updateUI() {
+                super.updateUI()
+                wifiList.clear()
+                wifiList.addAll(nearbyWifi)
+                recycler_view.adapter?.notifyDataSetChanged()
+            }
         }
 
-        Handler().postDelayed({
-            recycler_view.adapter?.notifyDataSetChanged()
-        }, 1)
-
-//        if (checkLocationPermission()) {
-//            wifiHelper.scan()
-//        }
+        if (checkLocationPermission()) {
+            wifiHelper.scan()
+        }
     }
 
     override fun onResume() {

@@ -36,7 +36,7 @@ open class WiFiHelper(_context: Context) {
         wifiManager.startScan();
     }
 
-    open fun scanSuccess() {
+    fun scanSuccess() {
         val results = wifiManager.scanResults
 
         Log.v(TAG, "Wi-Fi Scan Results ... Count:" + results.size)
@@ -64,7 +64,7 @@ open class WiFiHelper(_context: Context) {
         }
 
         // Execute callback
-        updateUI(nearbyWifi)
+        updateUI()
     }
 
     private fun scanFailure() {
@@ -82,7 +82,7 @@ open class WiFiHelper(_context: Context) {
         context.unregisterReceiver(wifiScanReceiver)
     }
 
-    fun updateUI(wifiList: ArrayList<WiFi>) {
+    open fun updateUI() {
 
     }
 
