@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -38,10 +39,9 @@ class MainActivity : AppCompatActivity() {
 
         // Initialize RecyclerView
         recycler_view.apply {
-
             layoutManager = LinearLayoutManager(context)
-
             adapter = WiFiAdapter(wifiList)
+            addItemDecoration(DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL))
         }
 
         // Setup helper and client
