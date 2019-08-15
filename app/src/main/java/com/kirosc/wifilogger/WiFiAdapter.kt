@@ -31,9 +31,9 @@ class WiFiAdapter(_wifiList: ArrayList<WiFi>) :
     override fun getItemCount() = wifiList.size
 
     override fun onBindViewHolder(holder: ViewHolder, pos: Int) {
-        holder.binding.ssid.text = wifiList[pos].SSID
-        holder.binding.bssid.text = wifiList[pos].BSSID
-        holder.binding.level.text = wifiList[pos].level.toString()
-        holder.binding.encryption.text = wifiList[pos].encryption
+        holder.binding.ssid = wifiList[pos].SSID
+        holder.binding.bssid = wifiList[pos].BSSID
+        holder.binding.level = wifiList[pos].level
+        holder.binding.encryption = wifiList[pos].encryption
     }
 }

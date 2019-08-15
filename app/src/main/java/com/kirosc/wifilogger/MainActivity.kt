@@ -11,12 +11,14 @@ import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.kirosc.wifilogger.databinding.ActivityMainBinding
 import com.kirosc.wifilogger.helper.WiFi
 import com.kirosc.wifilogger.helper.WiFiHelper
 import kotlinx.android.synthetic.main.activity_main.*
+
 
 class MainActivity : AppCompatActivity() {
     /**
@@ -73,6 +75,19 @@ class MainActivity : AppCompatActivity() {
         if (checkLocationPermission()) {
             wifiHelper.scan()
         }
+
+        // Add listener
+        // Hide FAB button when scrolling the list
+        recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                if (dy > 0 || dy < 0 && fab.isShown) fab.hide()
+            }
+
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) fab.show()
+                super.onScrollStateChanged(recyclerView, newState)
+            }
+        })
     }
 
     override fun onResume() {

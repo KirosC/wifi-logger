@@ -26,56 +26,56 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:paddingBottom="8dp"
-        android:paddingEnd="16dp"
         android:paddingStart="16dp"
-        android:paddingTop="8dp">
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
-                android:id="@+id/ssid"
+                android:id="@+id/ssid_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
-                android:textColor="@color/md_grey_900"
                 android:text="@{ssid}"
+                android:textColor="@color/md_grey_900"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tool:hint="SSID: Mum Use This One" />
 
             <TextView
-                android:id="@+id/bssid"
+                android:id="@+id/bssid_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/md_grey_600"
                 android:text="@{bssid}"
+                android:textColor="@color/md_grey_600"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/ssid"
+                app:layout_constraintTop_toBottomOf="@+id/ssid_tv"
                 tool:hint="BSSID: 4A-C0-D0-07-91-E5" />
 
             <TextView
-                android:id="@+id/level"
+                android:id="@+id/level_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="8dp"
-                android:textColor="@color/md_grey_600"
-                android:text='@{level + "dBm"}'
+                android:text='@{level + " dBm"}'
+                android:textColor="@{level >= -67 ? @color/md_green_400 : ( level > -80 ? @color/md_amber_400 : @color/md_red_A400 )}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tool:hint="-68 dBm" />
 
             <TextView
-                android:id="@+id/encryption"
+                android:id="@+id/encryption_tv"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/md_grey_600"
                 android:text="@{encryption}"
+                android:textColor="@color/md_grey_600"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/level"
+                app:layout_constraintTop_toBottomOf="@+id/level_tv"
                 tool:hint="WPA2" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
