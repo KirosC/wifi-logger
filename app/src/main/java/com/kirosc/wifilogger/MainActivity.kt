@@ -12,8 +12,7 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.*
 import com.kirosc.wifilogger.databinding.ActivityMainBinding
 import com.kirosc.wifilogger.helper.WiFi
 import com.kirosc.wifilogger.helper.WiFiHelper
@@ -31,11 +30,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var wifiHelper: WiFiHelper
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var wifiList = ArrayList<WiFi>()
+    private lateinit var currentLocation: Location
+    private var scanInterval: Long = 15000
+    private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding: ActivityMainBinding =
-            DataBindingUtil.setContentView(this, R.layout.activity_main)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         binding.loading = true
 
@@ -55,6 +56,7 @@ class MainActivity : AppCompatActivity() {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
+                    currentLocation = location
                     binding.loading = false
                     binding.latitude = location.latitude.toString()
                     binding.longitude = location.longitude.toString()
@@ -92,9 +94,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        startLocationUpdates()
         wifiHelper.register()
     }
-
 
     override fun onPause() {
         super.onPause()
@@ -151,6 +153,26 @@ class MainActivity : AppCompatActivity() {
             return false
         } else {
             return true
+        }
+    }
+
+    // Request location from the fused location provider
+    private fun startLocationUpdates() {
+        if (checkLocationPermission()) {
+            val locationRequest = LocationRequest.create()
+            locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            locationRequest.interval = scanInterval
+
+            val updateLocation = object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult?) {
+                    super.onLocationResult(result)
+                    binding.loading = false
+                    binding.latitude = result?.lastLocation?.latitude?.toString() ?: "Error"
+                    binding.longitude = result?.lastLocation?.longitude?.toString() ?: "Error"
+                }
+            }
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, updateLocation, null)
         }
     }
 }
