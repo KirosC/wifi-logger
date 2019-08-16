@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -35,6 +36,15 @@ class MainActivity : AppCompatActivity() {
     private var scanInterval: Long = 15000
     private lateinit var binding: ActivityMainBinding
 
+    // Create the Handler object (on the main thread by default)
+    private val handler = Handler()
+    // Define the code block to be executed
+    private val runnableCode: Runnable = Runnable {
+        // Do something here on the main thread
+        Log.d(TAG, "Handler is called on main thread");
+        if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
@@ -48,17 +58,7 @@ class MainActivity : AppCompatActivity() {
             addItemDecoration(DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL))
         }
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        // Setup helper and client
-        wifiHelper = object : WiFiHelper(this) {
-            override fun updateUI() {
-                super.updateUI()
-                wifiList.clear()
-                wifiList.addAll(nearbyWifi)
-                recycler_view.adapter?.notifyDataSetChanged()
-            }
-        }
+        initialize()
 
         // Add listener
         // Hide FAB button when scrolling the list
@@ -81,12 +81,13 @@ class MainActivity : AppCompatActivity() {
             wifiHelper?.register()
             getLastLocation()
             startLocationUpdates()
-            if (wifiHelper != null) scan(wifiHelper as WiFiHelper)
+            if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
         }
     }
 
     override fun onPause() {
         super.onPause()
+        handler.removeCallbacksAndMessages(null);
         wifiHelper?.unregister()
     }
 
@@ -97,17 +98,7 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             LOCATION_PERMISSIONS_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-                    // Setup helper and client
-                    wifiHelper = object : WiFiHelper(this) {
-                        override fun updateUI() {
-                            super.updateUI()
-                            wifiList.clear()
-                            wifiList.addAll(nearbyWifi)
-                            recycler_view.adapter?.notifyDataSetChanged()
-                        }
-                    }
+                    initialize()
                 } else {
                     Toast.makeText(this, getString(R.string.require_location_permission), Toast.LENGTH_SHORT).show()
                     finish()
@@ -126,6 +117,20 @@ class MainActivity : AppCompatActivity() {
 
             else -> {
                 // Ignore all other requests.
+            }
+        }
+    }
+
+    private fun initialize() {
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Setup helper and client
+        wifiHelper = object : WiFiHelper(this) {
+            override fun updateUI() {
+                super.updateUI()
+                wifiList.clear()
+                wifiList.addAll(nearbyWifi)
+                recycler_view.adapter?.notifyDataSetChanged()
             }
         }
     }
@@ -187,7 +192,8 @@ class MainActivity : AppCompatActivity() {
         fusedLocationClient.requestLocationUpdates(locationRequest, updateLocation, null)
     }
 
-    private fun scan(wifiHelper: WiFiHelper) {
+    private fun scanAndSchedule(wifiHelper: WiFiHelper) {
         wifiHelper.scan()
+        handler.postDelayed(runnableCode, scanInterval);
     }
 }

@@ -57,6 +57,7 @@ open class WiFiHelper(_context: Context) {
 
         // Execute callback
         updateUI()
+        nearbyWifi.clear()
     }
 
     private fun scanFailure() {
