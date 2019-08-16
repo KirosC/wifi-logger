@@ -1,11 +1,15 @@
 package com.kirosc.wifilogger
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -91,6 +95,38 @@ class MainActivity : AppCompatActivity() {
         wifiHelper?.unregister()
     }
 
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        val inflater: MenuInflater = menuInflater
+        inflater.inflate(R.menu.menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        // Handle item selection
+        return when (item.itemId) {
+            R.id.email -> {
+                // TODO: sendEmail
+                true
+            }
+            R.id.save -> {
+                // TODO: save
+                true
+            }
+            R.id.open -> {
+                // TODO: openFile
+                true
+            }
+            R.id.settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+
+
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -139,7 +175,6 @@ class MainActivity : AppCompatActivity() {
 
 
     private fun haveLocationPermission(): Boolean {
-        Log.v(TAG, "Called")
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
