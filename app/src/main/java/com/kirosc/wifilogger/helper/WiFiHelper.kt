@@ -17,11 +17,7 @@ open class WiFiHelper(_context: Context) {
 
         override fun onReceive(context: Context, intent: Intent) {
             val success = intent.getBooleanExtra(WifiManager.EXTRA_RESULTS_UPDATED, false)
-            if (success) {
-                scanSuccess()
-            } else {
-                scanFailure()
-            }
+            if (success) scanSuccess() else scanFailure()
         }
     }
 
@@ -33,31 +29,27 @@ open class WiFiHelper(_context: Context) {
     }
 
     fun scan() {
+        // Although startScan() is deprecated, Google haven't provide a workaround yet
         wifiManager.startScan();
     }
 
     fun scanSuccess() {
         val results = wifiManager.scanResults
 
-        Log.v(TAG, "Wi-Fi Scan Results ... Count:" + results.size)
+        Log.v(TAG, "Wi-Fi Scan Results ... Count: $results.size")
         Log.v(TAG, "---------------")
         for (result in results) {
-            Log.v(TAG, "\tBSSID\t= " + result.BSSID.toUpperCase())
-            Log.v(TAG, "\tSSID\t= " + result.SSID)
-            Log.v(TAG, "\tdBm\t\t= " + result.level)
-            Log.v(TAG, "\tcap.\t= " + result.capabilities)
+            Log.v(TAG, "\tBSSID\t= ${result.BSSID.toUpperCase()}")
+            Log.v(TAG, "\tSSID\t= ${result.SSID}")
+            Log.v(TAG, "\tdBm\t\t= ${result.level}")
+            Log.v(TAG, "\tcap.\t= ${result.capabilities}")
             Log.v(TAG, "---------------")
 
-            var encryption: String
-
-            if ("WEP" in result.capabilities) {
-                encryption = "WEP"
-            } else if ("WPA2" in result.capabilities) {
-                encryption = "WPA2"
-            } else if ("WPA" in result.capabilities) {
-                encryption = "WPA"
-            } else {
-                encryption = "OPEN"
+            val encryption: String = when {
+                "WEP" in result.capabilities -> "WEP"
+                "WPA2" in result.capabilities -> "WPA2"
+                "WPA" in result.capabilities -> "WPA"
+                else -> "OPEN"
             }
 
             nearbyWifi.add(WiFi(result.BSSID.toUpperCase(), result.SSID, result.level, encryption))

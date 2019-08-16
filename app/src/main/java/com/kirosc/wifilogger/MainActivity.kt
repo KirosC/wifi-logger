@@ -159,9 +159,10 @@ class MainActivity : AppCompatActivity() {
     // Request location from the fused location provider
     private fun startLocationUpdates() {
         if (checkLocationPermission()) {
-            val locationRequest = LocationRequest.create()
-            locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            locationRequest.interval = scanInterval
+            val locationRequest = LocationRequest.create().apply {
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+                interval = scanInterval
+            }
 
             val updateLocation = object : LocationCallback() {
                 override fun onLocationResult(result: LocationResult?) {
