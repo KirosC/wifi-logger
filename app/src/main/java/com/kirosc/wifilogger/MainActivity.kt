@@ -48,6 +48,18 @@ class MainActivity : AppCompatActivity() {
             addItemDecoration(DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL))
         }
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        // Setup helper and client
+        wifiHelper = object : WiFiHelper(this) {
+            override fun updateUI() {
+                super.updateUI()
+                wifiList.clear()
+                wifiList.addAll(nearbyWifi)
+                recycler_view.adapter?.notifyDataSetChanged()
+            }
+        }
+
         // Add listener
         // Hide FAB button when scrolling the list
         recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
