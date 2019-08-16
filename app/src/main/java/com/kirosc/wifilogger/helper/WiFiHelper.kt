@@ -25,7 +25,7 @@ open class WiFiHelper(_context: Context) {
 
     init {
         intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION)
-        context.registerReceiver(wifiScanReceiver, intentFilter)
+        register()
     }
 
     fun scan() {
@@ -36,7 +36,7 @@ open class WiFiHelper(_context: Context) {
     fun scanSuccess() {
         val results = wifiManager.scanResults
 
-        Log.v(TAG, "Wi-Fi Scan Results ... Count: $results.size")
+        Log.v(TAG, "Wi-Fi Scan Results ... Count: ${results.size}")
         Log.v(TAG, "---------------")
         for (result in results) {
             Log.v(TAG, "\tBSSID\t= ${result.BSSID.toUpperCase()}")

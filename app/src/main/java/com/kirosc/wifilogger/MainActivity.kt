@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private val STORAGE_PERMISSIONS_REQUEST_CODE = 1001
     private val TAG = "WiFiLogger_Debug"
 
-    private lateinit var wifiHelper: WiFiHelper
+    private var wifiHelper: WiFiHelper? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var wifiList = ArrayList<WiFi>()
     private lateinit var currentLocation: Location
@@ -47,37 +48,6 @@ class MainActivity : AppCompatActivity() {
             addItemDecoration(DividerItemDecoration(this.context, DividerItemDecoration.VERTICAL))
         }
 
-        // Setup helper and client
-        wifiHelper = WiFiHelper(this)
-
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
-        // What to do after getting the last location
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                if (location != null) {
-                    currentLocation = location
-                    binding.loading = false
-                    binding.latitude = location.latitude.toString()
-                    binding.longitude = location.longitude.toString()
-                } else {
-                    Toast.makeText(this, getString(R.string.location_error), Toast.LENGTH_SHORT).show()
-                }
-            }
-
-        val wifiHelper = object : WiFiHelper(this) {
-            override fun updateUI() {
-                super.updateUI()
-                wifiList.clear()
-                wifiList.addAll(nearbyWifi)
-                recycler_view.adapter?.notifyDataSetChanged()
-            }
-        }
-
-        if (checkLocationPermission()) {
-            wifiHelper.scan()
-        }
-
         // Add listener
         // Hide FAB button when scrolling the list
         recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -94,13 +64,18 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        startLocationUpdates()
-        wifiHelper.register()
+
+        if (haveLocationPermission()) {
+            wifiHelper?.register()
+            getLastLocation()
+            startLocationUpdates()
+            if (wifiHelper != null) scan(wifiHelper as WiFiHelper)
+        }
     }
 
     override fun onPause() {
         super.onPause()
-        wifiHelper.unregister()
+        wifiHelper?.unregister()
     }
 
     override fun onRequestPermissionsResult(
@@ -110,7 +85,17 @@ class MainActivity : AppCompatActivity() {
         when (requestCode) {
             LOCATION_PERMISSIONS_REQUEST_CODE -> {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                    fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+                    // Setup helper and client
+                    wifiHelper = object : WiFiHelper(this) {
+                        override fun updateUI() {
+                            super.updateUI()
+                            wifiList.clear()
+                            wifiList.addAll(nearbyWifi)
+                            recycler_view.adapter?.notifyDataSetChanged()
+                        }
+                    }
                 } else {
                     Toast.makeText(this, getString(R.string.require_location_permission), Toast.LENGTH_SHORT).show()
                     finish()
@@ -134,7 +119,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun checkLocationPermission(): Boolean {
+    private fun haveLocationPermission(): Boolean {
+        Log.v(TAG, "Called")
         if (ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -156,24 +142,40 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    // Request location from the fused location provider
-    private fun startLocationUpdates() {
-        if (checkLocationPermission()) {
-            val locationRequest = LocationRequest.create().apply {
-                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-                interval = scanInterval
-            }
-
-            val updateLocation = object : LocationCallback() {
-                override fun onLocationResult(result: LocationResult?) {
-                    super.onLocationResult(result)
+    private fun getLastLocation() {
+        fusedLocationClient.lastLocation
+            .addOnSuccessListener { location: Location? ->
+                if (location != null) {
+                    currentLocation = location
                     binding.loading = false
-                    binding.latitude = result?.lastLocation?.latitude?.toString() ?: "Error"
-                    binding.longitude = result?.lastLocation?.longitude?.toString() ?: "Error"
+                    binding.latitude = location.latitude.toString()
+                    binding.longitude = location.longitude.toString()
+                } else {
+                    Toast.makeText(this, getString(R.string.location_error), Toast.LENGTH_SHORT).show()
                 }
             }
+    }
 
-            fusedLocationClient.requestLocationUpdates(locationRequest, updateLocation, null)
+    // Request location from the fused location provider
+    private fun startLocationUpdates() {
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = scanInterval
         }
+
+        val updateLocation = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult?) {
+                super.onLocationResult(result)
+                binding.loading = false
+                binding.latitude = result?.lastLocation?.latitude?.toString() ?: "Error"
+                binding.longitude = result?.lastLocation?.longitude?.toString() ?: "Error"
+            }
+        }
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, updateLocation, null)
+    }
+
+    private fun scan(wifiHelper: WiFiHelper) {
+        wifiHelper.scan()
     }
 }
