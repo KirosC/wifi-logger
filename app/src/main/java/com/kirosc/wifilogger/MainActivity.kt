@@ -131,6 +131,8 @@ class MainActivity : AppCompatActivity() {
                 wifiList.clear()
                 wifiList.addAll(nearbyWifi)
                 recycler_view.adapter?.notifyDataSetChanged()
+                recycler_view.smoothScrollToPosition(0)
+                binding.loading = false
             }
         }
     }
@@ -164,7 +166,6 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
                     currentLocation = location
-                    binding.loading = false
                     binding.latitude = location.latitude.toString()
                     binding.longitude = location.longitude.toString()
                 } else {
@@ -183,7 +184,6 @@ class MainActivity : AppCompatActivity() {
         val updateLocation = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult?) {
                 super.onLocationResult(result)
-                binding.loading = false
                 binding.latitude = result?.lastLocation?.latitude?.toString() ?: "Error"
                 binding.longitude = result?.lastLocation?.longitude?.toString() ?: "Error"
             }
@@ -193,7 +193,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun scanAndSchedule(wifiHelper: WiFiHelper) {
+        binding.loading = true
         wifiHelper.scan()
-        handler.postDelayed(runnableCode, scanInterval);
+        handler.postDelayed(runnableCode, scanInterval)
     }
 }

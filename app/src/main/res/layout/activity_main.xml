@@ -21,6 +21,7 @@
     </data>
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -67,9 +68,9 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
+                android:text="@{latitude}"
                 android:textColor="@color/md_grey_900"
                 android:textSize="18sp"
-                android:text="@{latitude}"
                 android:visibility="@{loading ? View.GONE : View.VISIBLE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/latitude_title_tv"
@@ -98,9 +99,9 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
+                android:text="@{longitude}"
                 android:textColor="@color/md_grey_900"
                 android:textSize="18sp"
-                android:text="@{longitude}"
                 android:visibility="@{loading ? View.GONE : View.VISIBLE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="@+id/longitude_title_tv"
@@ -124,17 +125,35 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:scrollbars="vertical"
-                android:visibility="visible"
+                android:visibility="@{loading ? View.GONE : View.VISIBLE}"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:id="@+id/empty_view"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="16dp"
                 android:gravity="center"
                 android:text="@string/scanning"
                 android:textSize="18sp"
-                android:visibility="gone" />
+                android:visibility="@{loading ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toTopOf="@+id/progressBar"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:indeterminate="true"
+                android:visibility="@{loading ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="@+id/empty_view"
+                app:layout_constraintStart_toStartOf="@+id/empty_view"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/fab"
@@ -147,6 +166,8 @@
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:srcCompat="@drawable/ic_stop" />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 </layout>
