@@ -34,7 +34,7 @@ The following guide will help you download the project to the local machine, com
 5.  Run.
 
 ## Screenshots
-![](screenshots/01.png)
+[Screenshot](screenshots/01.png)
 
 ## Authors
 
@@ -44,3 +44,7 @@ The following guide will help you download the project to the local machine, com
 
 * [gson](https://github.com/google/gson) - Conversion between Java Object and JSON
 * [Guava](https://github.com/google/guava) - Core libraries
+
+## License
+
+[MIT](LICENSE) © Kiros Choi
