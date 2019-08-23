@@ -129,7 +129,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
-                android:id="@+id/empty_view"
+                android:id="@+id/scanning_view"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="8dp"
@@ -151,8 +151,8 @@
                 android:indeterminate="true"
                 android:visibility="@{loading ? View.VISIBLE : View.GONE}"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/empty_view"
-                app:layout_constraintStart_toStartOf="@+id/empty_view"
+                app:layout_constraintEnd_toEndOf="@+id/scanning_view"
+                app:layout_constraintStart_toStartOf="@+id/scanning_view"
                 app:layout_constraintTop_toTopOf="parent" />
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton

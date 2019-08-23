@@ -240,17 +240,12 @@ class MainActivity : AppCompatActivity() {
                     binding.latitude = readResult.latitude
                     binding.longitude = readResult.longitude
 
-                    if (readResult.wifiList.size == 0) {
-                        recycler_view.visibility = View.GONE
-                        empty_view.text = getString(R.string.no_wifi_nearby)
-                        empty_view.visibility = View.VISIBLE;
-                    } else {
-                        wifiList.clear()
-                        wifiList.addAll(readResult.wifiList)
-                        recycler_view.adapter?.notifyDataSetChanged()
-                        recycler_view.smoothScrollToPosition(0)
-                        binding.loading = false
-                    }
+
+                    wifiList.clear()
+                    wifiList.addAll(readResult.wifiList)
+                    recycler_view.adapter?.notifyDataSetChanged()
+                    recycler_view.smoothScrollToPosition(0)
+                    binding.loading = false
                 }
                 Activity.RESULT_CANCELED -> readOnlyMode(0)
             }
@@ -354,7 +349,7 @@ class MainActivity : AppCompatActivity() {
      * @param mode Turn off if 0; Turn on if 1
      */
     private fun readOnlyMode(mode: Int) {
-        val icon: Int = when(mode) {
+        val icon: Int = when (mode) {
             0 -> {
                 startLocationUpdates()
                 if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
@@ -382,7 +377,11 @@ class MainActivity : AppCompatActivity() {
 
         // Save the scan result and get the file Uri
         IOUtils.saveFile(scanResults)
-        val path = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", IOUtils.lastFile)
+        val path = FileProvider.getUriForFile(
+            this,
+            BuildConfig.APPLICATION_ID + ".provider",
+            IOUtils.lastFile
+        )
 
         intent = Intent(Intent.ACTION_SEND);
         intent.type = "message/rfc822"; // Only email apps should handle this
