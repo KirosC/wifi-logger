@@ -13,11 +13,11 @@
 
         <variable
             name="latitude"
-            type="String" />
+            type="Double" />
 
         <variable
             name="longitude"
-            type="String" />
+            type="Double" />
     </data>
 
     <LinearLayout
@@ -68,7 +68,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="@{latitude}"
+                android:text="@{Double.toString(latitude)}"
                 android:textColor="@color/md_grey_900"
                 android:textSize="18sp"
                 android:visibility="@{loading ? View.GONE : View.VISIBLE}"
@@ -99,7 +99,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="8dp"
-                android:text="@{longitude}"
+                android:text="@{Double.toString(longitude)}"
                 android:textColor="@color/md_grey_900"
                 android:textSize="18sp"
                 android:visibility="@{loading ? View.GONE : View.VISIBLE}"

@@ -4,7 +4,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -22,9 +21,11 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.location.*
+import com.kirosc.wifilogger.data.ScanResults
 import com.kirosc.wifilogger.databinding.ActivityMainBinding
-import com.kirosc.wifilogger.helper.WiFi
+import com.kirosc.wifilogger.data.WiFi
 import com.kirosc.wifilogger.helper.WiFiHelper
+import com.kirosc.wifilogger.utils.IOUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
 
@@ -40,15 +41,15 @@ class MainActivity : AppCompatActivity() {
     private var wifiHelper: WiFiHelper? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var wifiList = ArrayList<WiFi>()
-    private lateinit var currentLocation: Location
+    private lateinit var mLocation: Location
     private var scanInterval: Long = 60000
     private lateinit var binding: ActivityMainBinding
     private var readOnly = false
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(result: LocationResult?) {
             super.onLocationResult(result)
-            binding.latitude = result?.lastLocation?.latitude?.toString() ?: "Error"
-            binding.longitude = result?.lastLocation?.longitude?.toString() ?: "Error"
+            binding.latitude = result?.lastLocation?.latitude
+            binding.longitude = result?.lastLocation?.longitude
         }
     }
 
@@ -78,17 +79,16 @@ class MainActivity : AppCompatActivity() {
 
         // Add listener
         binding.fab.setOnClickListener {
-            val icon: Int
-            if (readOnly) {
+            val icon: Int = if (readOnly) {
                 startLocationUpdates()
                 if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
                 toast(getString(R.string.resume_scanning))
-                icon = R.drawable.ic_stop
+                R.drawable.ic_stop
             } else {
                 fusedLocationClient.removeLocationUpdates(locationCallback)
                 handler.removeCallbacksAndMessages(null);
                 toast(getString(R.string.stop_scanning))
-                icon = R.drawable.ic_scan
+                R.drawable.ic_scan
             }
             binding.fab.setImageDrawable(resources.getDrawable(icon, theme))
             readOnly = !readOnly
@@ -110,8 +110,14 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        val sharedPref = getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE)
-        scanInterval = TimeUnit.SECONDS.toMillis((sharedPref.getString(getString(R.string.key_scan_interval), "60")).toLong())
+        val sharedPref =
+            getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE)
+        scanInterval = TimeUnit.SECONDS.toMillis(
+            (sharedPref.getString(
+                getString(R.string.key_scan_interval),
+                "60"
+            )).toLong()
+        )
         if (haveLocationPermission()) {
             wifiHelper?.register()
             if (!readOnly) {
@@ -146,7 +152,14 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.save -> {
-                // TODO: save
+                if (haveStoragePermission()) {
+                    val scanResults = ScanResults(mLocation.latitude, mLocation.longitude, wifiList)
+                    if (IOUtils.saveFile(scanResults)) {
+                        toast("Saved to ${IOUtils.lastFile.absolutePath}")
+                    } else {
+                        toast(getString(R.string.fail_save))
+                    }
+                }
                 true
             }
             R.id.open -> {
@@ -183,7 +196,6 @@ class MainActivity : AppCompatActivity() {
 
                 } else {
                     toast(getString(R.string.require_storage_permission))
-                    finish()
                 }
             }
 
@@ -236,13 +248,32 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun haveStoragePermission(): Boolean {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ),
+                STORAGE_PERMISSIONS_REQUEST_CODE
+            )
+            return false
+        } else {
+            return true
+        }
+    }
+
     private fun getLastLocation() {
         fusedLocationClient.lastLocation
             .addOnSuccessListener { location: Location? ->
                 if (location != null) {
-                    currentLocation = location
-                    binding.latitude = location.latitude.toString()
-                    binding.longitude = location.longitude.toString()
+                    mLocation = location
+                    binding.latitude = location.latitude
+                    binding.longitude = location.longitude
                 } else {
                     toast(getString(R.string.location_error))
                 }

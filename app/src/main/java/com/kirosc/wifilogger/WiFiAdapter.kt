@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import com.kirosc.wifilogger.databinding.ListItemBinding
-import com.kirosc.wifilogger.helper.WiFi
+import com.kirosc.wifilogger.data.WiFi
 
 
 class WiFiAdapter(_wifiList: ArrayList<WiFi>) :

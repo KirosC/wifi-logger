@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.net.wifi.WifiManager
 import android.util.Log
+import com.kirosc.wifilogger.data.WiFi
 
 open class WiFiHelper(_context: Context) {
     private val TAG = "WiFiLogger_Debug"
@@ -52,7 +53,14 @@ open class WiFiHelper(_context: Context) {
                 else -> "OPEN"
             }
 
-            nearbyWifi.add(WiFi(result.BSSID.toUpperCase(), result.SSID, result.level, encryption))
+            nearbyWifi.add(
+                WiFi(
+                    result.BSSID.toUpperCase(),
+                    result.SSID,
+                    result.level,
+                    encryption
+                )
+            )
         }
 
         // Execute callback
