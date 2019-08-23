@@ -1,14 +1,15 @@
 package com.kirosc.wifilogger.utils
 
+import android.content.ContentResolver
+import android.content.Intent
 import android.os.Environment
 import com.kirosc.wifilogger.data.ScanResults
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import android.os.Environment.MEDIA_MOUNTED_READ_ONLY
 import android.os.Environment.MEDIA_MOUNTED
-import java.io.FileOutputStream
-import java.io.IOException
+import com.google.common.io.ByteStreams
+import java.io.*
 
 
 class IOUtils {
@@ -59,6 +60,42 @@ class IOUtils {
             } else {
                 return false
             }
+        }
+
+        /**
+         * Open a previously saved file.
+         * @param resolver The Content Resolver.
+         * @param data  The Intent that contains the Uri or Path that points to the file.
+         * @return  The content of the JSON formatted file in String or null if failed to retrieve the file.
+         */
+        fun openFile(resolver: ContentResolver, data: Intent): String? {
+            if (isExternalStorageReadable()) {
+                try {
+                    // For using normal file manager that provides Content Provider
+                    // Get the InputStream from the Content Provider
+                    val stream = resolver.openInputStream(data.data!!)
+                    // Change the InputStream to String
+                    return String(ByteStreams.toByteArray(stream!!))
+                } catch (e: FileNotFoundException) {
+                    e.printStackTrace()
+
+                    try {
+                        // For using other file managers that provide storage path
+                        val file = File(data.data!!.path)
+                        // Get the InputStream from the given path
+                        val stream = FileInputStream(file)
+
+                        return String(ByteStreams.toByteArray(stream))
+                    } catch (e1: IOException) {
+                        e1.printStackTrace()
+                    }
+
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+
+            }
+            return null
         }
 
         /**

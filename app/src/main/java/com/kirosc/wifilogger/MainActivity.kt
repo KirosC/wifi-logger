@@ -1,6 +1,7 @@
 package com.kirosc.wifilogger
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -11,6 +12,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -26,6 +28,8 @@ import com.kirosc.wifilogger.databinding.ActivityMainBinding
 import com.kirosc.wifilogger.data.WiFi
 import com.kirosc.wifilogger.helper.WiFiHelper
 import com.kirosc.wifilogger.utils.IOUtils
+import com.kirosc.wifilogger.utils.IOUtils.Companion.openFile
+import com.kirosc.wifilogger.utils.JsonUtils
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.concurrent.TimeUnit
 
@@ -36,6 +40,11 @@ class MainActivity : AppCompatActivity() {
      */
     private val LOCATION_PERMISSIONS_REQUEST_CODE = 1000
     private val STORAGE_PERMISSIONS_REQUEST_CODE = 1001
+    /**
+     * Request code for file picker
+     */
+    private val PICK_FILE_REQUEST_CODE = 2000
+
     private val TAG = "WiFiLogger_Debug"
 
     private var wifiHelper: WiFiHelper? = null
@@ -163,7 +172,7 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             R.id.open -> {
-                // TODO: openFile
+                openFile()
                 true
             }
             R.id.settings -> {
@@ -174,7 +183,6 @@ class MainActivity : AppCompatActivity() {
             else -> super.onOptionsItemSelected(item)
         }
     }
-
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -201,6 +209,43 @@ class MainActivity : AppCompatActivity() {
 
             else -> {
                 // Ignore all other requests.
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        // Check which request the app is responding to
+        if (requestCode == PICK_FILE_REQUEST_CODE) {
+            when (resultCode) {
+                Activity.RESULT_OK -> {
+                    // Convert the JSON String into a ScanResults object
+                    val readResult = try {
+                        val rawString = openFile(contentResolver, data!!)
+                        JsonUtils.toScanResults(rawString!!)!!
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        toast(getString(R.string.file_not_loaded))
+                        return
+                    }
+
+                    // Load result to UI
+                    binding.latitude = readResult.latitude
+                    binding.longitude = readResult.longitude
+
+                    if (readResult.wifiList.size == 0) {
+                        recycler_view.visibility = View.GONE
+                        empty_view.text = getString(R.string.no_wifi_nearby)
+                        empty_view.visibility = View.VISIBLE;
+                    } else {
+                        wifiList.clear()
+                        wifiList.addAll(readResult.wifiList)
+                        recycler_view.adapter?.notifyDataSetChanged()
+                        recycler_view.smoothScrollToPosition(0)
+                        binding.loading = false
+                    }
+                }
+                Activity.RESULT_CANCELED -> readOnlyMode(0)
             }
         }
     }
@@ -294,6 +339,49 @@ class MainActivity : AppCompatActivity() {
         binding.loading = true
         wifiHelper.scan()
         handler.postDelayed(runnableCode, scanInterval)
+    }
+
+    /**
+     * Turn on or off the read only mode.
+     *
+     * @param mode Turn off if 0; Turn on if 1
+     */
+    private fun readOnlyMode(mode: Int) {
+        val icon: Int = when(mode) {
+            0 -> {
+                startLocationUpdates()
+                if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
+                toast(getString(R.string.resume_scanning))
+                R.drawable.ic_stop
+            }
+            1 -> {
+                fusedLocationClient.removeLocationUpdates(locationCallback)
+                handler.removeCallbacksAndMessages(null);
+                toast(getString(R.string.stop_scanning))
+                R.drawable.ic_scan
+            }
+            else -> return
+        }
+        binding.fab.setImageDrawable(resources.getDrawable(icon, theme))
+        readOnly = !readOnly
+    }
+
+    /**
+     * Open the file manager to let the user choose the file.
+     */
+    private fun openFile() {
+        /* Checks if external storage is available to read */
+        if (!IOUtils.isExternalStorageReadable()) {
+            toast(getString(R.string.no_external_storage))
+            return
+        }
+
+        readOnlyMode(1)
+
+        // Start the file manager
+        val mRequestFileIntent = Intent(Intent.ACTION_GET_CONTENT)
+        mRequestFileIntent.type = "*/*"
+        startActivityForResult(mRequestFileIntent, PICK_FILE_REQUEST_CODE)
     }
 
     // Extenstion function for Toast
