@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +26,7 @@ import com.kirosc.wifilogger.databinding.ActivityMainBinding
 import com.kirosc.wifilogger.helper.WiFi
 import com.kirosc.wifilogger.helper.WiFiHelper
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.concurrent.TimeUnit
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var wifiList = ArrayList<WiFi>()
     private lateinit var currentLocation: Location
-    private var scanInterval: Long = 20000
+    private var scanInterval: Long = 60000
     private lateinit var binding: ActivityMainBinding
     private var readOnly = false
     private val locationCallback = object : LocationCallback() {
@@ -108,6 +110,8 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        val sharedPref = getSharedPreferences(getPackageName() + "_preferences", Context.MODE_PRIVATE)
+        scanInterval = TimeUnit.SECONDS.toMillis((sharedPref.getString(getString(R.string.key_scan_interval), "60")).toLong())
         if (haveLocationPermission()) {
             wifiHelper?.register()
             if (!readOnly) {
@@ -190,6 +194,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initialize() {
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         // Setup helper and client
