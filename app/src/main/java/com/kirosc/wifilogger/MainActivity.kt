@@ -1,8 +1,10 @@
 package com.kirosc.wifilogger
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.drawable.Drawable
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
@@ -37,8 +39,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var wifiList = ArrayList<WiFi>()
     private lateinit var currentLocation: Location
-    private var scanInterval: Long = 15000
+    private var scanInterval: Long = 20000
     private lateinit var binding: ActivityMainBinding
+    private var readOnly = false
+    private val locationCallback = object : LocationCallback() {
+        override fun onLocationResult(result: LocationResult?) {
+            super.onLocationResult(result)
+            binding.latitude = result?.lastLocation?.latitude?.toString() ?: "Error"
+            binding.longitude = result?.lastLocation?.longitude?.toString() ?: "Error"
+        }
+    }
 
     // Create the Handler object (on the main thread by default)
     private val handler = Handler()
@@ -46,7 +56,7 @@ class MainActivity : AppCompatActivity() {
     private val runnableCode: Runnable = Runnable {
         // Do something here on the main thread
         Log.d(TAG, "Handler is called on main thread");
-        if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
+        if (wifiHelper != null && !binding.loading) scanAndSchedule(wifiHelper as WiFiHelper)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -65,6 +75,23 @@ class MainActivity : AppCompatActivity() {
         initialize()
 
         // Add listener
+        binding.fab.setOnClickListener {
+            val icon: Int
+            if (readOnly) {
+                startLocationUpdates()
+                if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
+                toast(getString(R.string.resume_scanning))
+                icon = R.drawable.ic_stop
+            } else {
+                fusedLocationClient.removeLocationUpdates(locationCallback)
+                handler.removeCallbacksAndMessages(null);
+                toast(getString(R.string.stop_scanning))
+                icon = R.drawable.ic_scan
+            }
+            binding.fab.setImageDrawable(resources.getDrawable(icon, theme))
+            readOnly = !readOnly
+        }
+
         // Hide FAB button when scrolling the list
         recycler_view.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -83,16 +110,22 @@ class MainActivity : AppCompatActivity() {
 
         if (haveLocationPermission()) {
             wifiHelper?.register()
-            getLastLocation()
-            startLocationUpdates()
-            if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
+            if (!readOnly) {
+                getLastLocation()
+                startLocationUpdates()
+                if (wifiHelper != null) scanAndSchedule(wifiHelper as WiFiHelper)
+            }
         }
     }
 
     override fun onPause() {
         super.onPause()
-        handler.removeCallbacksAndMessages(null);
-        wifiHelper?.unregister()
+        fusedLocationClient.removeLocationUpdates(LocationCallback())
+        try {
+            handler.removeCallbacksAndMessages(null);
+            wifiHelper?.unregister()
+        } catch (e: Exception) {
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -126,7 +159,6 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>, grantResults: IntArray
@@ -136,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
                     initialize()
                 } else {
-                    Toast.makeText(this, getString(R.string.require_location_permission), Toast.LENGTH_SHORT).show()
+                    toast(getString(R.string.require_location_permission))
                     finish()
                 }
                 return
@@ -146,7 +178,7 @@ class MainActivity : AppCompatActivity() {
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
 
                 } else {
-                    Toast.makeText(this, getString(R.string.require_storage_permission), Toast.LENGTH_SHORT).show()
+                    toast(getString(R.string.require_storage_permission))
                     finish()
                 }
             }
@@ -187,7 +219,10 @@ class MainActivity : AppCompatActivity() {
             // Request location permission
             ActivityCompat.requestPermissions(
                 this,
-                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
                 LOCATION_PERMISSIONS_REQUEST_CODE
             )
             return false
@@ -204,7 +239,7 @@ class MainActivity : AppCompatActivity() {
                     binding.latitude = location.latitude.toString()
                     binding.longitude = location.longitude.toString()
                 } else {
-                    Toast.makeText(this, getString(R.string.location_error), Toast.LENGTH_SHORT).show()
+                    toast(getString(R.string.location_error))
                 }
             }
     }
@@ -216,15 +251,7 @@ class MainActivity : AppCompatActivity() {
             interval = scanInterval
         }
 
-        val updateLocation = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult?) {
-                super.onLocationResult(result)
-                binding.latitude = result?.lastLocation?.latitude?.toString() ?: "Error"
-                binding.longitude = result?.lastLocation?.longitude?.toString() ?: "Error"
-            }
-        }
-
-        fusedLocationClient.requestLocationUpdates(locationRequest, updateLocation, null)
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
     }
 
     private fun scanAndSchedule(wifiHelper: WiFiHelper) {
@@ -232,4 +259,8 @@ class MainActivity : AppCompatActivity() {
         wifiHelper.scan()
         handler.postDelayed(runnableCode, scanInterval)
     }
+
+    // Extenstion function for Toast
+    fun Context.toast(message: CharSequence) =
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
