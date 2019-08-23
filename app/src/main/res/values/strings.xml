@@ -9,7 +9,6 @@
     <string name="summary_scan_interval">The time between two consecutive scans</string>
     <string name="dialog_title_scan_interval">Scanning frequency (second)</string>
 
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="settings">Settings</string>
     <string name="loading">Loading…</string>
     <string name="latitude">Latitude</string>

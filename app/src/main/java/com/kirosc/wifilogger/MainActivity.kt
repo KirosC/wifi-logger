@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.util.Log
@@ -17,6 +18,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.FileProvider
 import androidx.databinding.DataBindingUtil
 import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -31,6 +33,7 @@ import com.kirosc.wifilogger.utils.IOUtils
 import com.kirosc.wifilogger.utils.IOUtils.Companion.openFile
 import com.kirosc.wifilogger.utils.JsonUtils
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.reflect.Method
 import java.util.concurrent.TimeUnit
 
 
@@ -157,7 +160,11 @@ class MainActivity : AppCompatActivity() {
         // Handle item selection
         return when (item.itemId) {
             R.id.email -> {
-                // TODO: sendEmail
+                if (binding.loading) {
+                    toast(getString(R.string.scanning))
+                } else {
+                    sendEmail()
+                }
                 true
             }
             R.id.save -> {
@@ -367,6 +374,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
+     * Save the ScanResult on the device first, then send the Email
+     */
+    private fun sendEmail() {
+        val scanResults = ScanResults(mLocation.latitude, mLocation.longitude, wifiList)
+        if (!haveStoragePermission()) return
+
+        // Save the scan result and get the file Uri
+        IOUtils.saveFile(scanResults)
+        val path = FileProvider.getUriForFile(this, BuildConfig.APPLICATION_ID + ".provider", IOUtils.lastFile)
+
+        intent = Intent(Intent.ACTION_SEND);
+        intent.type = "message/rfc822"; // Only email apps should handle this
+        intent.putExtra(Intent.EXTRA_STREAM, path);
+        intent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION;
+
+        startActivity(intent);
+    }
+
+    /**
      * Open the file manager to let the user choose the file.
      */
     private fun openFile() {
@@ -385,6 +411,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     // Extenstion function for Toast
-    fun Context.toast(message: CharSequence) =
+    private fun Context.toast(message: CharSequence) =
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
 }
